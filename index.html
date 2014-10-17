@@ -261,17 +261,13 @@
       });
 
       try {
-        var tm = $(window).touchmove();
-        if (tm) {
-          tm(function(e) {
-            e.preventDefault();
-            e.stopPropagation();
+        $(document).on('touchmove', function(e) {
+          var touch = e.originalEvent.touches[0];
 
-            mouse(e);
-            
-            return false;
-          });
-        }
+          mouse(e);
+
+          return false; // prevent default
+        })
       } catch (err) {
         console.log(err);
       }

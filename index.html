@@ -1,0 +1,185 @@
+<html>
+<head>
+  <title>Genie All</title>
+
+  <link href="http://vjs.zencdn.net/4.6/video-js.css" rel="stylesheet">
+  <style type="text/css">
+    #container {
+    }
+
+    #video_id {
+      display: none;
+    }
+
+    img {
+      position: absolute;
+      border: 0px;
+    }
+
+    #bg {
+      z-index: -1;
+    }
+
+    #lamp {
+      position: absolute;
+      left: 70px;
+      top: 200px;
+    }
+  </style>
+</head>
+<body>
+
+
+  <div id="container">
+
+    <img id="bg" src="img/full.png">
+    <img src="img/stars_glow.png">
+    <img id="lamp" src="img/genie_lamp.png">
+
+    <video id="video_id" src="" width="780px" height="440px" class="video-js vjs-default-skin" controls preload="auto" data-setup='{ "techOrder": ["youtube"], "src": "http://www.youtube.com/embed/1CH76F1mFis" }'></video>
+  </div>
+
+
+  <script type="text/javascript" src="js/0_jquery-1.11.1.js"></script>
+
+  <script type="text/javascript" src="http://jqueryrotate.googlecode.com/svn/trunk/jQueryRotate.js"></script>
+
+
+  <script type="text/javascript">
+
+  $(function() {
+
+    // initalizes lamp rotation container
+    $('#lamp').rotate(0);
+
+    var ticks = 0;
+    var container = $('#container');
+    var lamp = $('#lamp');
+    var amount = 10;
+    var wobble = 0;
+
+    function rub() {
+      wobble += 1;
+    }
+
+    container.on('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      console.log("clicked");
+      wobble += 1;
+
+      return false;
+    });
+
+    var MSPF = 1000 / 20;
+    var frames = 0;
+    var speed = 1;
+    var running = true;
+
+
+    function dropIntro() {
+      var oldLamp = $('#lamp');
+      var oP = oldLamp.position().top; // old position
+      console.log(oP);
+      var newHeight = -oldLamp.height();
+      console.log("new: " + newHeight);
+      oldLamp.css('top', newHeight - 50);
+      console.log("new real position: " + oldLamp.position().top);
+      var from = newHeight;
+      var now = from;
+      console.log("from: " + from);
+
+
+      var grav = 3;
+      var yspd = 2;
+      var bounceCount = 0;
+      var bounceMax = 4;
+
+      // loop
+      function introLoop() {
+        introAnimation(introLoop);
+      }
+      introLoop();
+
+      function introAnimation(callback) {
+        var lamp = $('#lamp');
+
+        yspd += grav;
+        var s = (now + yspd);
+
+        var oldY = oP;
+
+        if (s > oldY) { // bounce from ground
+          s = oldY - (s - oldY);
+          
+          if (bounceCount < 1) {
+            wobble += (yspd / (20 * (bounceCount * 3 + 1) ) );
+          } else {
+            wobble -= (yspd / (15 * (bounceCount * 1 + 1) ) );
+          }
+          console.log("bounce speed: " + yspd | 0);
+
+          yspd = -(yspd / 1.80);
+          bounceCount++;
+        }
+
+        // update lamp position
+        lamp.css({ top: s });
+        now = s;
+
+        if (bounceCount < bounceMax) {
+          setTimeout(callback, MSPF);
+        } else {
+          // set position to original value
+          lamp.css({ top: oP });
+        }
+      }
+
+    }
+    setTimeout(dropIntro, 1000);
+
+
+    function start() {
+      function loop() {
+        render(loop)
+      }
+      loop();
+
+      function render(callback) {
+        frames++;
+
+        if (wobble > 0) {
+          // animate lamp
+          var a = (wobble * amount);
+
+          var rot = ( Math.sin(frames++ / ( 5 * speed )) * wobble * 2 );
+
+          //$('#lamp').rotate( Math.sin(frames++ / a) * a - (a / 2) );
+
+          $('#lamp').rotate( rot );
+        }
+
+        wobble *= .99;
+        if (wobble < 0.2) {
+          wobble = 0.2;
+        }
+
+        if (running) {
+          setTimeout(callback, MSPF);
+        }
+      }
+    }
+    start();
+
+  });
+
+  </script>
+
+  <!-- 
+  <script type="text/javascript" src="js/1_video.js"></script>
+  <script type="text/javascript" src="js/2_vjs.youtube.js"></script>
+  -->
+
+</body>
+</html>

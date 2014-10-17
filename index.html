@@ -4,7 +4,13 @@
 
   <link href="http://vjs.zencdn.net/4.6/video-js.css" rel="stylesheet">
   <style type="text/css">
+    body {
+      overflow: hidden;
+    }
+
     #container {
+      margin-left: auto;
+      margin-right: auto;
     }
 
     #video_id {
@@ -17,13 +23,18 @@
     }
 
     #bg {
-      z-index: -1;
     }
 
     #lamp {
-      position: absolute;
+      position: relative;
       left: 70px;
       top: 200px;
+    }
+
+    .trail {
+      display: block;
+      position: absolute;
+      z-index: 1;
     }
   </style>
 </head>
@@ -33,7 +44,7 @@
   <div id="container">
 
     <img id="bg" src="img/full.png">
-    <img src="img/stars_glow.png">
+    <img id="glow" src="img/stars_glow.png">
     <img id="lamp" src="img/genie_lamp.png">
 
     <video id="video_id" src="" width="780px" height="440px" class="video-js vjs-default-skin" controls preload="auto" data-setup='{ "techOrder": ["youtube"], "src": "http://www.youtube.com/embed/1CH76F1mFis" }'></video>
@@ -46,6 +57,14 @@
 
 
   <script type="text/javascript">
+  if (!console) {
+    console = {
+      log: function(str) {
+        // do nothing
+      }
+    } 
+  }
+
 
   $(function() {
 
@@ -171,6 +190,74 @@
       }
     }
     start();
+
+    /**
+      * Glowy stars
+      */
+    var glowing = true;
+    (function() {
+      var img = $('#glow');
+      var duration = 1000;
+      function loop() {
+        if (glowing) {
+          img.fadeIn(duration, function() {
+            img.fadeOut(duration, loop);
+          })
+        }
+      }
+      if (img) {
+        loop();
+      }
+    })();
+
+    /**
+      * Initialize Mouse Trail Effect
+      */
+
+
+    $(document).ready(function() {
+      var gifs = ['twinkle', 'gcspinny', 'sparkles29jc', 'sparkle'];
+      var ticker = 0;
+      var skip = 10;
+      var counter = 0;
+      $('#container').mousemove(function(e) {
+        counter++;
+        if (counter < skip) {
+          return;
+        }
+        counter = 0;
+
+        var pointer = $('<img>').attr({'src':'img/' + gifs[ticker++ % gifs.length] + '.gif'});
+
+        pointer.addClass('trail');
+
+        var x = e.pageX - pointer.width() / 2;
+        var y = e.pageY - pointer.height() / 2;
+
+        var duration = 1000;
+        var nx = x + (Math.random() * 6 - 3) * (duration >> 7);
+        var ny = y + (Math.random() * 6) * (duration >> 7);
+
+        var props = {
+          opacity: 0,
+          left: nx,
+          top: ny
+        }
+
+        // add to document
+        $(document.body).append(pointer);
+
+        pointer.css({
+          'position': 'absolute',
+          left: x,
+          top: y
+        }).animate(props, duration, function(){ $(this).remove(); });
+
+      });
+    });
+
+
+
 
   });
 

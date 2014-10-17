@@ -82,12 +82,7 @@
     }
 
     container.on('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      console.log("clicked");
-      wobble += 1;
-
+      rub();
       return false;
     });
 
@@ -262,9 +257,9 @@
 
       try {
         $(document).on('touchmove', function(e) {
-          var touch = e.originalEvent.touches[0];
+          var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
 
-          mouse(e);
+          mouse(touch);
 
           return false; // prevent default
         })

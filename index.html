@@ -264,7 +264,12 @@
         var tm = $(window).touchmove();
         if (tm) {
           tm(function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
             mouse(e);
+            
+            return false;
           });
         }
       } catch (err) {

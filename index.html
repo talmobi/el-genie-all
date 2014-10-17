@@ -220,7 +220,8 @@
       var ticker = 0;
       var skip = 10;
       var counter = 0;
-      $('#container').mousemove(function(e) {
+
+      function mouse(e) {
         counter++;
         if (counter < skip) {
           return;
@@ -253,13 +254,25 @@
           top: y
         }).animate(props, duration, function(){ $(this).remove(); });
 
+      } // f.mouse(e)
+
+      $(document).mousemove(function(e) {
+        mouse(e);
       });
-    });
 
+      try {
+        var tm = $(window).touchmove();
+        if (tm) {
+          tm(function(e) {
+            mouse(e);
+          });
+        }
+      } catch (err) {
+        console.log(err);
+      }
 
-
-
-  });
+    }); // document ready
+  }); // $()
 
   </script>
 

@@ -1,7 +1,8 @@
 $(function() {
-  var pMopde = (~'localhost'.indexOf(document.URL));
+  var pMode = (~'localhost'.indexOf(document.URL));
+  var dMode = ('localhost'.indexOf(document.URL));
 
-  if (!console || pMopde) {
+  if (!console || !dMode) {
     console = {
       log: function(str) {
         // do nothing
@@ -148,7 +149,7 @@ $(function() {
     renderer.view.style.left = "0px";
     //renderer.view.style.padding = "0";
 
-    if (!pMopde) {
+    if (dMode) {
       var _g = new PIXI.Graphics();
       _g.beginFill(0x00EE00, 0.1); // half transparent, green
       utils.movePolygon(vertices, GeniePlace.x, GeniePlace.y);
@@ -296,8 +297,11 @@ $(function() {
 
   function rub() {
     wobble += 0.33;
+    if (ismobile) {
+      wobble += 0.33;
+    }
 
-    if (canvasSupport) {
+    if (canvasSupport && !ismobile) {
       for (var i = 0; i < wobble / 3; i++) {
         spawnParticle();
       }
@@ -484,7 +488,7 @@ $(function() {
     //mobileHitAreaFix();
 
     // draw hitbox for testing
-    if (!pMopde) {
+    if (dMode) {
       var g = new PIXI.Graphics();
       g.beginFill(0x00FF00, 0.5);
       g.drawRect(sprGenie.hitArea.x + sprGenie.width * sprGenie.anchor.x,
@@ -531,7 +535,9 @@ $(function() {
     vc.fadeIn(t, function() {
       window.running = false;
       try {
-        v[0].player.play();
+        if (!ismobile) {
+          v[0].player.play();
+        }
       } catch (err) {
         console.log(err);
       }

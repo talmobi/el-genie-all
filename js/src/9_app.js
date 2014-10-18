@@ -22,7 +22,7 @@ $(function() {
 
   var frames = 0; // rendered frame count
   var speed = 1; // wobble speed
-  var running = true; // paints genie lamp if true
+  window.running = true; // paints genie lamp if true
 
   var GeniePlace = {
     x: 70,
@@ -119,7 +119,7 @@ $(function() {
   /**
     * Configure Canvas if available
     */ 
-  if (utils.isCanvasSupported()) {
+  if (canvasSupport) {
     var canvas;
 
     var canvas_width = WIDTH || window.innerWidth;
@@ -232,22 +232,29 @@ $(function() {
     }
 
     function spawnParticle(x, y, size, max) {
-      if (!running || transitioningToVideo) {
+      if (!window.running) {
         return;
       }
 
       if (!x || !y) {
         var lamp = $('#lamp');
         if (lamp) {
-          var m = (ismobile ? 40 : 100)
-          for (var i = 0; i < m; i++) { // try max 40 times
-            x = lamp.position().left + Math.random() * lamp.width();
-            y = lamp.position().top + Math.random() * lamp.height();
-            if (polygon.contains(x, y)) {
-              y += lamp.height() / 4;
-              console.log("Inside Polygon ["+x+"]["+y+"]! " + i + " attempts.");
-              break;
+          try {
+            var m = (ismobile ? 40 : 100)
+            for (var i = 0; i < m; i++) { // try max 40 times
+              x = lamp.position().left + Math.random() * lamp.width();
+              y = lamp.position().top + Math.random() * lamp.height();
+              if (polygon.contains(x, y)) {
+                y += lamp.height() / 4;
+                console.log("Inside Polygon ["+x+"]["+y+"]! " + i + " attempts.");
+                break;
+              }
             }
+          } catch (err) {
+            window.running = true;
+            videoTransition();
+            console.log(err);
+            return;
           }
         }
       } // X Y initialized
@@ -366,7 +373,6 @@ $(function() {
         bounceCount++;
 
         if (bounceCount > 1) {
-          //setTimeout(videoTransition, 2000);
         }
       }
 
@@ -397,7 +403,7 @@ $(function() {
       tick(update);
     }
     // run only if canvas is available
-    if (utils.isCanvasSupported()) {
+    if (canvasSupport) {
       update();
       console.log("Ticking Started!");
     }
@@ -423,7 +429,7 @@ $(function() {
       renderer.render(stage);
 
       // Schedule next tick
-      if (running) {
+      if (window.running) {
         setTimeout(callback, MSPT);
       }
     }
@@ -452,7 +458,7 @@ $(function() {
 
       }
 
-      if (running) {
+      if (window.running) {
         setTimeout(callback, MSPF);
       }
     }
@@ -511,13 +517,19 @@ $(function() {
   /**
     * Video Transition
     */
+
+  var _vtCalled = false;
   function videoTransition() {
+    if (_vtCalled) {
+      return false;
+    }
+    _vtCalled = true;
 
     var t = 3000;
     var vc = $('#video_container');
     var v = $('#video_id');
     vc.fadeIn(t, function() {
-      running = false;
+      window.running = false;
       try {
         v[0].player.play();
       } catch (err) {
@@ -612,6 +624,10 @@ $(function() {
     }
 
     function canvasMouse(e) {
+      if (!window.running) {
+        return;
+      }
+
       rubbingCalculator(e);
 
       var pos = {
@@ -640,6 +656,10 @@ $(function() {
     }
 
     function jqueryMouse(e) {
+       if (!window.running) {
+        return;
+      }
+
       rubbingCalculator(e);
 
       counter++;

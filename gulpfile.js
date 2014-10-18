@@ -17,7 +17,7 @@ gulp.task('js', function(callback) {
       .pipe(concat('0_vendor.js'))
       .pipe(gulp.dest(stage));
 
-  gulp.src('js/min/*.js')
+  gulp.src('js/src/*.js')
       .pipe(concat('9_main.min.js'))
       .pipe(uglify())
       .pipe(gulp.dest(stage));
@@ -27,6 +27,14 @@ gulp.task('js', function(callback) {
       .pipe(gulp.dest(dst));
 
   callback();
+});
+
+gulp.task('stage', function(callback) {
+  var src = 'js/*.js',
+      dst = 'dist/js';
+
+  gulp.src(src)
+      .pipe(concat)
 });
 
 gulp.task('css', function(callback) {

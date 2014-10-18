@@ -1,0 +1,27 @@
+{
+  "name": "el-genie-all",
+  "version": "0.0.0",
+  "description": "Elance Work Project, IE8 compatible version",
+  "main": "index.js",
+  "dependencies": {
+    "serve": "^1.4.0"
+  },
+  "devDependencies": {
+    "gulp-concat": "^2.4.1",
+    "gulp-imagemin": "^1.1.0",
+    "gulp-uglify": "^1.0.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hannyajin/el-genie-all.git"
+  },
+  "author": "hannyajin <talmo.christian@gmail.com> (http://jin.fi/)",
+  "license": "CC",
+  "bugs": {
+    "url": "https://github.com/hannyajin/el-genie-all/issues"
+  },
+  "homepage": "https://github.com/hannyajin/el-genie-all"
+}

@@ -1,22 +1,20 @@
-var pMopde = (~'localhost'.indexOf(document.URL));
-
-if (!console || pMopde) {
-  console = {
-    log: function(str) {
-      // do nothing
-    }
-  } 
-}
-
-var utils = {
-  isCanvasSupported: function() {
-    var elem = document.createElement('canvas');
-    return !!(elem.getContext && elem.getContext('2d'));
-  }
-}
-
-
 $(function() {
+  var pMopde = (~'localhost'.indexOf(document.URL));
+
+  if (!console || pMopde) {
+    console = {
+      log: function(str) {
+        // do nothing
+      }
+    } 
+  }
+
+  var utils = {
+    isCanvasSupported: function() {
+      var elem = document.createElement('canvas');
+      return !!(elem.getContext && elem.getContext('2d'));
+    }
+  };
 
   // initalizes lamp rotation container
   $('#lamp').rotate(0);
@@ -265,5 +263,5 @@ $(function() {
   } // No Canvas Fallback
 
 
-  
+
 }); // $()

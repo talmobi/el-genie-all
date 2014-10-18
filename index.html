@@ -6,6 +6,10 @@
   <style type="text/css">
     body {
       overflow: hidden;
+      padding: 0;
+      margin: 0;
+      width: 100%;
+      height: 100%;
     }
 
     #container {
@@ -13,13 +17,33 @@
       margin-right: auto;
     }
 
-    #video_id {
+
+    #video_container {
       display: none;
+      position: absolute;
+
+      width: 780px;
+      height: 440px;
+
+      max-width: 780px;
+      max-height: 440px;
+
+      width: 100%;
+      height: 100%;
+
+
+      top: 130px;
+      left: 90px;
     }
+
+    #video_id {
+      width: 100%;
+      height: 100%;
+    }
+
 
     img {
       position: absolute;
-      border: 0px;
     }
 
     #bg {
@@ -29,6 +53,7 @@
       position: relative;
       left: 70px;
       top: 200px;
+      direction: none;
     }
 
     .trail {
@@ -47,7 +72,9 @@
     <img id="glow" src="img/stars_glow.png">
     <img id="lamp" src="img/genie_lamp.png">
 
-    <video id="video_id" src="" width="780px" height="440px" class="video-js vjs-default-skin" controls preload="auto" data-setup='{ "techOrder": ["youtube"], "src": "http://www.youtube.com/embed/1CH76F1mFis" }'></video>
+    <div id="video_container">
+      <video id="video_id" src="" width="780px" height="440px" class="video-js vjs-default-skin" controls preload="auto" data-setup='{ "techOrder": ["youtube"], "src": "http://www.youtube.com/embed/1CH76F1mFis" }'></video>
+    </div>
   </div>
 
 
@@ -57,7 +84,9 @@
 
 
   <script type="text/javascript">
-  if (!console) {
+  var pMopde = (~'localhost'.indexOf(document.URL));
+
+  if (!console || pMopde) {
     console = {
       log: function(str) {
         // do nothing
@@ -96,7 +125,7 @@
       var oldLamp = $('#lamp');
       var oP = oldLamp.position().top; // old position
       console.log(oP);
-      var newHeight = -oldLamp.height();
+      var newHeight = -oldLamp.height() * 1.2;
       console.log("new: " + newHeight);
       oldLamp.css('top', newHeight - 50);
       console.log("new real position: " + oldLamp.position().top);
@@ -106,7 +135,7 @@
 
 
       var grav = 3;
-      var yspd = 2;
+      var yspd = 10;
       var bounceCount = 0;
       var bounceMax = 4;
 
@@ -151,7 +180,7 @@
       }
 
     }
-    setTimeout(dropIntro, 1000);
+    dropIntro();
 
 
     function start() {
@@ -163,20 +192,25 @@
       function render(callback) {
         frames++;
 
-        if (wobble > 0) {
-          // animate lamp
-          var a = (wobble * amount);
+        var lamp = $('#lamp');
 
-          var rot = ( Math.sin(frames++ / ( 5 * speed )) * wobble * 2 );
 
-          //$('#lamp').rotate( Math.sin(frames++ / a) * a - (a / 2) );
+        if (lamp) {
+          if (wobble > 0) {
+            // animate lamp
+            var a = (wobble * amount);
 
-          $('#lamp').rotate( rot );
-        }
+            var rot = ( Math.sin(frames++ / ( 5 * speed )) * wobble * 2 );
 
-        wobble *= .99;
-        if (wobble < 0.2) {
-          wobble = 0.2;
+            //$('#lamp').rotate( Math.sin(frames++ / a) * a - (a / 2) );
+            lamp.rotate( rot );
+          }
+
+          wobble *= .99;
+          if (wobble < 0.2) {
+            wobble = 0.2;
+          }
+
         }
 
         if (running) {
@@ -205,11 +239,30 @@
       }
     })();
 
+
+    /**
+      * Video Transition
+      */
+    function videoTransition() {
+
+      var t = 3000;
+      var vc = $('#video_container');
+      var v = $('#video_id');
+      vc.fadeIn(t, function() {
+        running = false;
+        v[0].player.play();
+      });
+
+      $('#lamp').animate({ opacity: 0}, t, function() {
+        $(this).remove();
+      });
+    }
+
+    setTimeout(videoTransition, 2000);
+
     /**
       * Initialize Mouse Trail Effect
       */
-
-
     $(document).ready(function() {
       var gifs = ['twinkle', 'gcspinny', 'sparkles29jc', 'sparkle'];
       var ticker = 0;
@@ -253,6 +306,8 @@
 
       $(document).mousemove(function(e) {
         mouse(e);
+
+        return false;
       });
 
       try {
@@ -272,10 +327,8 @@
 
   </script>
 
-  <!-- 
   <script type="text/javascript" src="js/1_video.js"></script>
   <script type="text/javascript" src="js/2_vjs.youtube.js"></script>
-  -->
 
 </body>
 </html>

@@ -331,17 +331,17 @@ $(function() {
   function dropIntro() {
     var oldLamp = $('#lamp');
     var oP = GeniePlace.y; // old position
-    console.log(oP);
+    //console.log(oP);
     var newHeight = -oldLamp.height() * 1.2;
-    console.log("new: " + newHeight);
-    oldLamp.css('top', newHeight - 50);
-    console.log("new real position: " + oldLamp.position().top);
+    //console.log("new: " + newHeight);
+    oldLamp.css('top', newHeight - 200);
+    //console.log("new real position: " + oldLamp.position().top);
     var from = newHeight;
     var now = from;
-    console.log("from: " + from);
+    //console.log("from: " + from);
 
-    var grav = 3;
-    var yspd = 10;
+    var grav = .25;
+    var yspd = 2;
     var bounceCount = 0;
     var bounceMax = 4;
 
@@ -372,7 +372,7 @@ $(function() {
           spawnLampParticles();
         }
         spawnParticle();
-        console.log("bounce speed: " + yspd | 0);
+        //console.log("bounce speed: " + yspd | 0);
 
         yspd = -(yspd / 1.80);
         bounceCount++;
@@ -386,7 +386,7 @@ $(function() {
       now = s;
 
       if (bounceCount < bounceMax) {
-        setTimeout(callback, MSPF);
+        setTimeout(callback, MSPF * grav);
       } else {
         // set position to original value
         lamp.css({ top: oP });

@@ -240,7 +240,7 @@ $(function() {
         var lamp = $('#lamp');
         if (lamp) {
           try {
-            var m = (ismobile ? 40 : 100)
+            var m = (ismobile ? 40 : 100);
             for (var i = 0; i < m; i++) { // try max 40 times
               x = lamp.position().left + Math.random() * lamp.width();
               y = lamp.position().top + Math.random() * lamp.height();

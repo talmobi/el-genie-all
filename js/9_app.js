@@ -68,6 +68,11 @@ $(function() {
     }
   };
 
+  var canvasSupport = utils.isCanvasSupported();
+  utils.isCanvasSupported = function() {
+    return canvasSupport;
+  }
+
   // initalizes lamp rotation container
   $('#lamp').rotate(0);
 
@@ -77,9 +82,43 @@ $(function() {
   var amount = 10;
   var wobble = 0;
 
+
+  // polygon vertices of lamp to spawn sparkles from (collision detection)
+  var vertices = [0, 100, 420, 0, 740, 50,
+                  750, 250, 510, 350, 300, 350,
+                  0, 160];
+  var polygon = {
+    data: vertices,
+    points: (function() {
+      var p = [];
+      for (var i = 0, il = vertices.length; i < il; i+=2) {
+        p.push({
+          x: vertices[i],
+          y: vertices[i+1]
+        });
+      }
+      return p;
+    })(),
+    contains:  function(x, y) { // Taken from PIXI.js source
+      var inside = false;
+   
+      // use some raycasting to test hits
+      // https://github.com/substack/point-in-polygon/blob/master/index.js
+      for(var i = 0, j = this.points.length - 1; i < this.points.length; j = i++) {
+        var xi = this.points[i].x, yi = this.points[i].y,
+          xj = this.points[j].x, yj = this.points[j].y,
+          intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+
+        if(intersect) inside = !inside;
+      }
+   
+      return inside;
+    }
+  };
+
   /**
     * Configure Canvas if available
-    */
+    */ 
   if (utils.isCanvasSupported()) {
     var canvas;
 
@@ -109,12 +148,6 @@ $(function() {
     renderer.view.style.left = "0px";
     //renderer.view.style.padding = "0";
 
-
-    // draw polygon of lamp to spawn sparkles from (collision detection)
-    var vertices = [0, 100, 420, 0, 740, 50,
-                    750, 250, 510, 350, 300, 350,
-                    0, 160];
-
     if (!pMopde) {
       var _g = new PIXI.Graphics();
       _g.beginFill(0x00EE00, 0.1); // half transparent, green
@@ -123,7 +156,7 @@ $(function() {
       stage.addChild(_g);
     }
 
-    var polygon = new PIXI.Polygon( vertices );
+    //var polygon = new PIXI.Polygon( vertices );
 
     /**
       * Particle System
@@ -131,7 +164,7 @@ $(function() {
     var particleLimit = (ismobile) ? 6 : 12;
     var particleCounter = 0;
 
-    var mouseTrailTroggle = true;
+    var mouseTrailToggle = true;
 
     var pBatch = new PIXI.SpriteBatch();
     stage.addChild(pBatch); // add batch to stage !important
@@ -199,6 +232,10 @@ $(function() {
     }
 
     function spawnParticle(x, y, size, max) {
+      if (!running || transitioningToVideo) {
+        return;
+      }
+
       if (!x || !y) {
         var lamp = $('#lamp');
         if (lamp) {
@@ -207,6 +244,7 @@ $(function() {
             x = lamp.position().left + Math.random() * lamp.width();
             y = lamp.position().top + Math.random() * lamp.height();
             if (polygon.contains(x, y)) {
+              y += lamp.height() / 4;
               console.log("Inside Polygon ["+x+"]["+y+"]! " + i + " attempts.");
               break;
             }
@@ -214,37 +252,60 @@ $(function() {
         }
       } // X Y initialized
 
-      //var p = new Particle(50, 50);
-      var p = new Particle(x, y);
 
-      var q = size || 1;
-      if (max) {
-        q += (Math.random() * (max - size) | 0);
-        if (q < 0) {
-          q = -q;
+      if (canvasSupport) {
+        //var p = new Particle(50, 50);
+        var p = new Particle(x, y);
+
+        var q = size || 1;
+        if (max) {
+          q += (Math.random() * (max - size) | 0);
+          if (q < 0) {
+            q = -q;
+          }
         }
-      }
-      p.scale.x = p.scale.y = q || 1;
-      //p.scale.x = p.scale.y = 10;
+        p.scale.x = p.scale.y = q || 1;
+        //p.scale.x = p.scale.y = 10;
 
-      particles.push(p);
-      pBatch.addChild(p);
+        particles.push(p);
+        pBatch.addChild(p);
+      } else {
+        spawnJqueryParticle(x,y, size, max);
+      }
     }
   }
 
   function spawnLampParticles() {
     spawnParticle(null, null, 1, 2);
-    spawnParticle(null, null, 1, 2);
-    spawnParticle(null, null, 3, 4);
+
+    if (canvasSupport) {
+      spawnParticle(null, null, 3, 4);
+    } else {
+
+    }
   }
 
-  function rub() {
-    wobble += 1;
+  var transitioningToVideo = false;
 
-    if (utils.isCanvasSupported()) { // Canvas available
+  function rub() {
+    wobble += 0.33;
+
+    if (canvasSupport) {
+      for (var i = 0; i < wobble / 3; i++) {
+        spawnParticle();
+      }
+    }
+
+    if (canvasSupport) { // Canvas available
       spawnLampParticles();
     } else { // No Canvas Fallback
+      spawnLampParticles();
+    }
 
+
+    if (wobble > 4 && !transitioningToVideo) {
+      transitioningToVideo = true;
+      setTimeout(videoTransition, 2000);
     }
   }
 
@@ -457,93 +518,192 @@ $(function() {
     var v = $('#video_id');
     vc.fadeIn(t, function() {
       running = false;
-      v[0].player.play();
+      try {
+        v[0].player.play();
+      } catch (err) {
+        console.log(err);
+      }
     });
 
     $('#lamp').animate({ opacity: 0}, t, function() {
       $(this).remove();
     });
+
+    if (canvasSupport) {
+      $(canvas).animate({ opacity: 0}, t, function() {
+        $(this).remove();
+      });
+    }
   } // f.videoTransition
 
+
+  /**
+    * Jquery Particle Spawner
+    */
+  var gifs = ['twinkle', 'gcspinny', 'sparkles29jc', 'sparkle'];
+  var ticker = 0; // loops through all sparkles
+
+  function spawnJqueryParticle(ex, ey, size, max) {
+    console.log("Spawning Jquery Particles");
+
+    var pointer = $('<img>').attr({'src':'img/' + gifs[ticker++ % gifs.length] + '.gif'});
+
+    pointer.addClass('trail');
+
+    var x = ex - pointer.width() / 2;
+    var y = ey + pointer.height() * 2 + 10;
+
+    var duration = 1000;
+    var nx = x + (Math.random() * 6 - 3) * (duration >> 7);
+    var ny = y + (Math.random() * 6) * (duration >> 7);
+
+    var props = {
+      opacity: 0,
+      left: nx,
+      top: ny
+    }
+
+    // add to document
+    $(document.body).append(pointer);
+
+    pointer.css({
+      'position': 'absolute',
+      left: x,
+      top: y
+    }).animate(props, duration, function(){ $(this).remove(); });
+
+  }
+
+  function spawnJqueryLampParticle(x, y) {
+
+  }
 
   /**
     * Configure sparkles and mouse trails for canvas
     * and fallback to jquery animations if not supported (ie8)
     */
-  if (utils.isCanvasSupported()) {
-    console.log("Canvas Supported!~~");
+  (function() {
+    var skip = 10; // # of mouse move events to skip before a sparkle
+    var counter = 0; // counts # of sparkles to skip
 
+    var pDesktops = 2;
+    var pMobiles = 1;
+    var pBunch = (ismobile ? pMobiles : pDesktops);
 
+    var lastRubPos;
 
-  } else { // No Canvas Fallback
-    console.log("NO CANVAS SUPPORT!");
-
-    /**
-      * Initialize Mouse Trail Effect
-      */
-    $(document).ready(function() {
-      var gifs = ['twinkle', 'gcspinny', 'sparkles29jc', 'sparkle'];
-      var ticker = 0; // loops through all sparkles
-      var skip = 10; // # of mouse move events to skip before a sparkle
-      var counter = 0; // counts # of sparkles to skip
-
-      function mouse(e) {
-        counter++;
-        if (counter < skip) {
-          return;
+    function rubbingCalculator(e) {
+      if (lastRubPos) {
+        var now = {
+          x: e.pageX,
+          y: e.pageY
         }
-        counter = 0;
-
-        var pointer = $('<img>').attr({'src':'img/' + gifs[ticker++ % gifs.length] + '.gif'});
-
-        pointer.addClass('trail');
-
-        var x = e.pageX - pointer.width() / 2;
-        var y = e.pageY - pointer.height() / 2;
-
-        var duration = 1000;
-        var nx = x + (Math.random() * 6 - 3) * (duration >> 7);
-        var ny = y + (Math.random() * 6) * (duration >> 7);
-
-        var props = {
-          opacity: 0,
-          left: nx,
-          top: ny
+        var d = utils.distance(now, lastRubPos);
+        if (d > WIDTH / 4) {
+          rub();
+          lastRubPos = now;
         }
+      } else {
+        lastRubPos = {
+          x: e.pageX,
+          y: e.pageY
+        }
+      }
+    }
 
-        // add to document
-        $(document.body).append(pointer);
+    function canvasMouse(e) {
+      rubbingCalculator(e);
 
-        pointer.css({
-          'position': 'absolute',
-          left: x,
-          top: y
-        }).animate(props, duration, function(){ $(this).remove(); });
-
-      } // f.mouse(e)
-
-      $(document).mousemove(function(e) {
-        mouse(e);
-
-        return false;
-      });
-
-      try {
-        $(document).on('touchmove', function(e) {
-          var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
-
-          mouse(touch);
-
-          return false; // prevent default
-        })
-      } catch (err) {
-        console.log(err);
+      var pos = {
+        x: e.pageX,
+        y: e.pageY
       }
 
-    }); // document ready
+      particleCounter++;
+      if (particleCounter < particleLimit) {
+        return false; // skip
+      }
+      particleCounter = 0;
 
-  } // No Canvas Fallback
+      if (mouseTrailToggle) {
+        for (var i = 0; i < pBunch; i++) {
+          var p = new Particle(pos.x + i * 5, pos.y);
+          p.v.x += i * .15;
+          p.v.y += .2;
+          p.scale.x = p.scale.y = (ismobile ? 2 : 1);
+          particles.push(p);
+          pBatch.addChild(p);
+        }
+      }
 
+      return false;
+    }
+
+    function jqueryMouse(e) {
+      rubbingCalculator(e);
+
+      counter++;
+      if (counter < skip) {
+        return;
+      }
+      counter = 0;
+
+      var pointer = $('<img>').attr({'src':'img/' + gifs[ticker++ % gifs.length] + '.gif'});
+
+      pointer.addClass('trail');
+
+      var x = e.pageX - pointer.width() / 2;
+      var y = e.pageY - pointer.height() / 2;
+
+      var duration = 1000;
+      var nx = x + (Math.random() * 6 - 3) * (duration >> 7);
+      var ny = y + (Math.random() * 6) * (duration >> 7);
+
+      var props = {
+        opacity: 0,
+        left: nx,
+        top: ny
+      }
+
+      // add to document
+      $(document.body).append(pointer);
+
+      pointer.css({
+        'position': 'absolute',
+        left: x,
+        top: y
+      }).animate(props, duration, function(){ $(this).remove(); });
+
+      return false;
+    } // f.jqueryMouse(e)
+
+    $(document).mousemove(function(e) {
+      
+      if (canvasSupport) {
+        canvasMouse(e);
+      } else {
+        jqueryMouse(e);
+      }
+
+      return false;
+    });
+
+    try {
+      $(document).on('touchmove', function(e) {
+        var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+        
+        if (canvasSupport) {
+          canvasMouse(touch);
+        } else {
+          jqueryMouse(touch);
+        }
+
+        return false; // prevent default
+      })
+    } catch (err) {
+      console.log(err);
+    }
+  })();
 
 
 }); // $()

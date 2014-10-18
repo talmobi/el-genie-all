@@ -1,6 +1,7 @@
 $(function() {
   var pMode = (~'localhost'.indexOf(document.URL));
   var dMode = ('localhost'.indexOf(document.URL));
+  dMode = false;
 
   if (!console || !dMode) {
     console = {

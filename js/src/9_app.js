@@ -564,6 +564,7 @@ $(function() {
 
     $('#hand_id').animate({ opacity: 0 }, t / 1.2, function() {
       show_hand = false;
+      $('#hand_id').css({ display: "none" });
     });
 
     if (canvasSupport) {
@@ -754,20 +755,13 @@ $(function() {
   if (!ismobile) {
     $('#hand_id').show();
 
-    try {
-      $(document).mousemove(function(e) {
-        if (show_hand) {
-          $('#hand_id').offset({
-          left: e.pageX,
-          top: e.pageY
-          });      
-        } else {
-          $('#hand_id').hide();
-        }
-      });
-    } catch (err) {
-      console.log(err);
-    }
+    $(document).mousemove(function(e) {
+      $('#hand_id').offset({
+        left: e.pageX,
+        top: e.pageY
+      });      
+    });
+
   } else {
     $('#hand_id').hide();
   }

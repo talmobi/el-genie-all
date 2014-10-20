@@ -303,9 +303,16 @@ $(function() {
   var transitioningToVideo = false;
 
   function rub() {
-    wobble += 0.33;
+    wobble += 0.4;
     if (ismobile) {
-      wobble += 0.33;
+      wobble += 0.3;
+    }
+
+    wobble *= 1.1;
+
+    var _max = 8;
+    if (wobble > _max) {
+      wobble = _max;
     }
 
     if (canvasSupport && !ismobile) {
@@ -323,7 +330,7 @@ $(function() {
 
     if (wobble > 4 && !transitioningToVideo) {
       transitioningToVideo = true;
-      setTimeout(videoTransition, 2000);
+      setTimeout(videoTransition, 1000);
     }
   }
 
@@ -525,6 +532,7 @@ $(function() {
   })();
 
 
+  var show_hand = true;
   /**
     * Video Transition
     */
@@ -552,6 +560,10 @@ $(function() {
 
     $('#lamp').animate({ opacity: 0}, t, function() {
       $(this).remove();
+    });
+
+    $('#hand_id').animate({ opacity: 0 }, t / 1.2, function() {
+      show_hand = false;
     });
 
     if (canvasSupport) {
@@ -624,7 +636,7 @@ $(function() {
           y: e.pageY
         }
         var d = utils.distance(now, lastRubPos);
-        if (d > WIDTH / 4) {
+        if (d > WIDTH / 5) {
           rub();
           lastRubPos = now;
         }
@@ -741,7 +753,7 @@ $(function() {
   // set mouse hand follow cursor
   try {
     $(document).mousemove(function(e) {
-      if (running) {
+      if (show_hand) {
         $('#hand_id').offset({
         left: e.pageX,
         top: e.pageY

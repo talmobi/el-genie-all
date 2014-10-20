@@ -431,7 +431,7 @@ $(function() {
           buf.push(p);
         } else {
           pBatch.removeChild(p);
-          console.log('particle removed.');
+          //console.log('particle removed.');
         }
       }
       // swap
@@ -738,5 +738,20 @@ $(function() {
     }
   })();
 
+  // set mouse hand follow cursor
+  try {
+    $(document).mousemove(function(e) {
+      if (running) {
+        $('#hand_id').offset({
+        left: e.pageX,
+        top: e.pageY
+        });      
+      } else {
+        $('#hand_id').hide();
+      }
+    });
+  } catch (err) {
+    console.log(err);
+  }
 
 }); // $()

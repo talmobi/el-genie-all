@@ -14,7 +14,13 @@ $(function() {
   /**
     * App config
     */
-  var ismobile = (WURFL) ? WURFL.is_mobile : true;
+  //var ismobile = (WURFL) ? WURFL.is_mobile : true;
+  var ismobile = true;
+  if (WURFL) {
+    if (WURFL.form_factor === 'Desktop') {
+      ismobile = false;
+    }
+  }
   var WIDTH = 960 || window.innerWidth;
   var HEIGHT = window.innerHeight;
   var FPS = 20;
@@ -340,7 +346,7 @@ $(function() {
     var now = from;
     //console.log("from: " + from);
 
-    var grav = .25;
+    var grav = (ismobile) ?  .4 : .25;
     var yspd = 2;
     var bounceCount = 0;
     var bounceMax = 4;

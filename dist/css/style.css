@@ -30,7 +30,6 @@ body {
   width: 100%;
   height: 100%;
 
-
   top: 130px;
   left: 90px;
 }
@@ -48,6 +47,10 @@ img {
 #bg {
 }
 
+body {
+  cursor: none;
+}
+
 #lamp {
   position: fixed;
   /*left: 70px;
@@ -55,8 +58,14 @@ img {
   left: 70px;
   top: -400px;
 
-  cursor: pointer; /* modern browsers */
-  cursor: hand; /* old IE */
+  /* cursor: pointer; /* modern browsers */
+  /* cursor: hand; /* old IE */
+
+  cursor: none;
+}
+
+#hand_id {
+  pointer-events: none;
 }
 
 #canvasContainer {

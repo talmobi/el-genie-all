@@ -65,6 +65,7 @@ body {
 }
 
 #hand_id {
+  z-index: 3;
   pointer-events: none;
 }
 
@@ -79,7 +80,7 @@ body {
 }
 
 canvas {
-  z-index: 10;
+  z-index: 2;
 }
 
 #canvasContainer {

@@ -752,6 +752,8 @@ $(function() {
 
   // set mouse hand follow cursor
   if (!ismobile) {
+    $('#hand_id').show();
+
     try {
       $(document).mousemove(function(e) {
         if (show_hand) {
@@ -766,6 +768,8 @@ $(function() {
     } catch (err) {
       console.log(err);
     }
+  } else {
+    $('#hand_id').hide();
   }
 
 }); // $()

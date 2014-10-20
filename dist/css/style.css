@@ -66,6 +66,7 @@ body {
 
 #hand_id {
   z-index: 3;
+  display: none;
   pointer-events: none;
 }
 

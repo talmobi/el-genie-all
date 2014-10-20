@@ -751,19 +751,21 @@ $(function() {
   })();
 
   // set mouse hand follow cursor
-  try {
-    $(document).mousemove(function(e) {
-      if (show_hand) {
-        $('#hand_id').offset({
-        left: e.pageX,
-        top: e.pageY
-        });      
-      } else {
-        $('#hand_id').hide();
-      }
-    });
-  } catch (err) {
-    console.log(err);
+  if (!ismobile) {
+    try {
+      $(document).mousemove(function(e) {
+        if (show_hand) {
+          $('#hand_id').offset({
+          left: e.pageX,
+          top: e.pageY
+          });      
+        } else {
+          $('#hand_id').hide();
+        }
+      });
+    } catch (err) {
+      console.log(err);
+    }
   }
 
 }); // $()

@@ -49,7 +49,7 @@ img {
 }
 
 #lamp {
-  position: relative;
+  position: fixed;
   /*left: 70px;
   top: 200px;*/
   left: 70px;
